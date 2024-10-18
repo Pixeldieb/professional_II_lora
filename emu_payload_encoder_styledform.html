@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Include Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&family=Press+Start+2P&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&family=Roboto+Mono&display=swap"
         rel="stylesheet">
 
     <style>
@@ -69,11 +69,12 @@
         }
 
         .payload-display {
-            font-family: 'Press Start 2P', monospace;
-            font-size: var(--payload-font-size);
+            font-family: 'Roboto Mono', monospace;
+            font-size: calc(var(--title-font-size) * 1.2);
             color: #221F20;
             margin-top: 10px;
             word-break: break-all;
+            overflow-wrap: anywhere;
         }
 
         #data input[type='number'] {
@@ -96,6 +97,7 @@
             flex: 1 1 calc(33.333% - 10px);
             display: flex;
             align-items: center;
+            position: relative;
         }
 
         .checkbox-group input {
@@ -106,6 +108,40 @@
         .checkbox-group label {
             flex: 1;
             color: #221F20;
+        }
+
+        /* Tooltip icon */
+        .tooltip-icon {
+            margin-left: 5px;
+            color: #888;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Tooltip text */
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #fff;
+            color: #221F20;
+            text-align: left;
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the icon */
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        /* Show the tooltip text when hovering over the icon */
+        .tooltip-icon:hover + .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
 
         /* Style for the "Uplink should be confirmed" checkbox */
@@ -153,6 +189,18 @@
                 min-width: 100%;
                 margin-right: 0;
             }
+        }
+
+        /* Bottom section styling */
+        .bottom-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid var(--main-color);
+        }
+
+        .bottom-section p {
+            margin-bottom: 10px;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -206,69 +254,426 @@
         </div>
     </form>
 
+    <!-- Bottom Section -->
+    <div class="bottom-section">
+        <p>
+            These is the downlink decoder and encoder and uplink decoder (Payload Formatters) for the EMU Professional II LoRa.
+        </p>
+        <p>
+            It can be used for The Things Network and for ChirpStack.io.
+        </p>
+        <p>
+            The file <strong>Lora-Payload-Generator.html</strong> can be used for easily selection of the needed uplink-values. Just select the data fields and the readout interval, and the downlink message will be displayed.
+        </p>
+        <p>
+            Examples (e.g., generating downlink messages) can be found in the example folder.
+        </p>
+        <p>
+            This encoder helps you configure the EMU Professional II LoRa device by generating the appropriate payloads for downlink messages. Use it to customize your data collection intervals and select specific data points to monitor.
+        </p>
+    </div>
+
     <script>
         // The script runs after the DOM elements are available
 
         var dataTypes = [];
-        dataTypes[0x00] = { 'len': 4, 'description': 'data-logger-index', 'dataType': 'Uint32' };
-        dataTypes[0x01] = { 'len': 4, 'description': 'timestamp', 'dataType': 'Uint32', 'unit': 'seconds' };
-        dataTypes[0x02] = { 'len': 4, 'description': 'timestamp-previous', 'dataType': 'Uint32', 'unit': 'seconds' };
-        dataTypes[0x03] = { 'len': 4, 'description': 'Active Energy Import T1', 'dataType': 'Uint32', 'unit': 'Wh' };
-        dataTypes[0x04] = { 'len': 4, 'description': 'Active Energy Import T2', 'dataType': 'Uint32', 'unit': 'Wh' };
-        dataTypes[0x05] = { 'len': 4, 'description': 'Active Energy Export T1', 'dataType': 'Uint32', 'unit': 'Wh' };
-        dataTypes[0x06] = { 'len': 4, 'description': 'Active Energy Export T2', 'dataType': 'Uint32', 'unit': 'Wh' };
-        dataTypes[0x07] = { 'len': 4, 'description': 'Reactive Energy Import T1', 'dataType': 'Uint32', 'unit': 'varh' };
-        dataTypes[0x08] = { 'len': 4, 'description': 'Reactive Energy Import T2', 'dataType': 'Uint32', 'unit': 'varh' };
-        dataTypes[0x09] = { 'len': 4, 'description': 'Reactive Energy Export T1', 'dataType': 'Uint32', 'unit': 'varh' };
-        dataTypes[0x0A] = { 'len': 4, 'description': 'Reactive Energy Export T2', 'dataType': 'Uint32', 'unit': 'varh' };
-        dataTypes[0x0B] = { 'len': 4, 'description': 'Active Power L123', 'dataType': 'Int32', 'unit': 'W' };
-        dataTypes[0x0C] = { 'len': 4, 'description': 'Active Power L1', 'dataType': 'Int32', 'unit': 'W' };
-        dataTypes[0x0D] = { 'len': 4, 'description': 'Active Power L2', 'dataType': 'Int32', 'unit': 'W' };
-        dataTypes[0x0E] = { 'len': 4, 'description': 'Active Power L3', 'dataType': 'Int32', 'unit': 'W' };
-        dataTypes[0x0F] = { 'len': 4, 'description': 'Current L123', 'dataType': 'Int32', 'unit': 'mA' };
-        dataTypes[0x10] = { 'len': 4, 'description': 'Current L1', 'dataType': 'Int32', 'unit': 'mA' };
-        dataTypes[0x11] = { 'len': 4, 'description': 'Current L2', 'dataType': 'Int32', 'unit': 'mA' };
-        dataTypes[0x12] = { 'len': 4, 'description': 'Current L3', 'dataType': 'Int32', 'unit': 'mA' };
-        dataTypes[0x13] = { 'len': 4, 'description': 'Current N', 'dataType': 'Int32', 'unit': 'mA' };
-        dataTypes[0x14] = { 'len': 4, 'description': 'Voltage L1-N', 'dataType': 'Int32', 'unit': 'V/10' };
-        dataTypes[0x15] = { 'len': 4, 'description': 'Voltage L2-N', 'dataType': 'Int32', 'unit': 'V/10' };
-        dataTypes[0x16] = { 'len': 4, 'description': 'Voltage L3-N', 'dataType': 'Int32', 'unit': 'V/10' };
-        dataTypes[0x17] = { 'len': 1, 'description': 'Powerfactor L1', 'dataType': 'Int8', 'unit': 'Cos' };
-        dataTypes[0x18] = { 'len': 1, 'description': 'Powerfactor L2', 'dataType': 'Int8', 'unit': 'Cos' };
-        dataTypes[0x19] = { 'len': 1, 'description': 'Powerfactor L3', 'dataType': 'Int8', 'unit': 'Cos' };
-        dataTypes[0x1A] = { 'len': 2, 'description': 'Frequency', 'dataType': 'Int16', 'unit': 'Hz' };
-        dataTypes[0x1B] = { 'len': 4, 'description': 'Active Power average', 'dataType': 'Int32', 'unit': 'W' };
-        dataTypes[0x1C] = { 'len': 4, 'description': 'Active Energy Import T1 kWh', 'dataType': 'Uint32', 'unit': 'kWh' };
-        dataTypes[0x1D] = { 'len': 4, 'description': 'Active Energy Import T2 kWh', 'dataType': 'Uint32', 'unit': 'kWh' };
-        dataTypes[0x1E] = { 'len': 4, 'description': 'Active Energy Export T1 kWh', 'dataType': 'Uint32', 'unit': 'kWh' };
-        dataTypes[0x1F] = { 'len': 4, 'description': 'Active Energy Export T2 kWh', 'dataType': 'Uint32', 'unit': 'kWh' };
-        dataTypes[0x20] = { 'len': 4, 'description': 'Reactive Energy Import T1 kvarh', 'dataType': 'Uint32', 'unit': 'kvarh' };
-        dataTypes[0x21] = { 'len': 4, 'description': 'Reactive Energy Import T2 kvarh', 'dataType': 'Uint32', 'unit': 'kvarh' };
-        dataTypes[0x22] = { 'len': 4, 'description': 'Reactive Energy Export T1 kvarh', 'dataType': 'Uint32', 'unit': 'kvarh' };
-        dataTypes[0x23] = { 'len': 4, 'description': 'Reactive Energy Export T2 kvarh', 'dataType': 'Uint32', 'unit': 'kvarh' };
-        dataTypes[0x24] = { 'len': 8, 'description': 'Active Energy Import T1 64bit', 'dataType': 'uInt64', 'unit': 'Wh' };
-        dataTypes[0x25] = { 'len': 8, 'description': 'Active Energy Import T2 64bit', 'dataType': 'uInt64', 'unit': 'Wh' };
-        dataTypes[0x26] = { 'len': 8, 'description': 'Active Energy Export T1 64bit', 'dataType': 'uInt64', 'unit': 'Wh' };
-        dataTypes[0x27] = { 'len': 8, 'description': 'Active Energy Export T2 64bit', 'dataType': 'uInt64', 'unit': 'Wh' };
-        dataTypes[0x28] = { 'len': 8, 'description': 'Reactive Energy Import T1 64bit', 'dataType': 'uInt64', 'unit': 'varh' };
-        dataTypes[0x29] = { 'len': 8, 'description': 'Reactive Energy Import T2 64bit', 'dataType': 'uInt64', 'unit': 'varh' };
-        dataTypes[0x2A] = { 'len': 8, 'description': 'Reactive Energy Export T1 64bit', 'dataType': 'uInt64', 'unit': 'varh' };
-        dataTypes[0x2B] = { 'len': 8, 'description': 'Reactive Energy Export T2 64bit', 'dataType': 'uInt64', 'unit': 'varh' };
-        dataTypes[0xF0] = { 'len': 1, 'description': 'errorcode', 'dataType': 'ErrorCode' };
-        dataTypes[0xF1] = { 'len': 4, 'description': 'serial-number', 'dataType': 'MeterSerial' };
-        dataTypes[0xF2] = { 'len': 4, 'description': 'factor-number', 'dataType': 'MeterSerial' };
-        dataTypes[0xF3] = { 'len': 2, 'description': 'current-transformer primary', 'dataType': 'Uint16' };
-        dataTypes[0xF4] = { 'len': 2, 'description': 'current-transformer secondary', 'dataType': 'Uint16' };
-        dataTypes[0xF5] = { 'len': 2, 'description': 'voltage-transformer primary', 'dataType': 'Uint16' };
-        dataTypes[0xF6] = { 'len': 2, 'description': 'voltage-transformer secondary', 'dataType': 'Uint16' };
-        dataTypes[0xF7] = { 'len': 1, 'description': 'meter-type', 'dataType': 'Uint8' };
-        dataTypes[0xF8] = { 'len': 4, 'description': 'MID year', 'dataType': 'BCD' };
-        dataTypes[0xF9] = { 'len': 4, 'description': 'factory year', 'dataType': 'BCD' };
-        dataTypes[0xFA] = { 'len': 4, 'description': 'firmware version', 'dataType': 'ASCII' };
-        dataTypes[0xFB] = { 'len': 4, 'description': 'mid-Version', 'dataType': 'ASCII' };
-        dataTypes[0xFC] = { 'len': 4, 'description': 'manufacturer', 'dataType': 'ASCII' };
-        dataTypes[0xFD] = { 'len': 4, 'description': 'hw-index', 'dataType': 'ASCII' };
-        dataTypes[0xFE] = { 'len': 4, 'description': 'systemtime', 'dataType': 'Uint32' };
+        dataTypes[0x00] = {
+            'len': 4,
+            'description': 'data-logger-index',
+            'dataType': 'Uint32',
+            'tooltip': 'Unique index of the data logger entry.'
+        };
+        dataTypes[0x01] = {
+            'len': 4,
+            'description': 'timestamp',
+            'dataType': 'Uint32',
+            'unit': 'seconds',
+            'tooltip': 'Timestamp of the current data logger entry in seconds since epoch.'
+        };
+        dataTypes[0x02] = {
+            'len': 4,
+            'description': 'timestamp-previous',
+            'dataType': 'Uint32',
+            'unit': 'seconds',
+            'tooltip': 'Timestamp of the previous data logger entry in seconds since epoch.'
+        };
+        dataTypes[0x03] = {
+            'len': 4,
+            'description': 'Active Energy Import T1',
+            'dataType': 'Uint32',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy imported in tariff T1 (in Wh).'
+        };
+        dataTypes[0x04] = {
+            'len': 4,
+            'description': 'Active Energy Import T2',
+            'dataType': 'Uint32',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy imported in tariff T2 (in Wh).'
+        };
+        dataTypes[0x05] = {
+            'len': 4,
+            'description': 'Active Energy Export T1',
+            'dataType': 'Uint32',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy exported in tariff T1 (in Wh).'
+        };
+        dataTypes[0x06] = {
+            'len': 4,
+            'description': 'Active Energy Export T2',
+            'dataType': 'Uint32',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy exported in tariff T2 (in Wh).'
+        };
+        dataTypes[0x07] = {
+            'len': 4,
+            'description': 'Reactive Energy Import T1',
+            'dataType': 'Uint32',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy imported in tariff T1 (in varh).'
+        };
+        dataTypes[0x08] = {
+            'len': 4,
+            'description': 'Reactive Energy Import T2',
+            'dataType': 'Uint32',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy imported in tariff T2 (in varh).'
+        };
+        dataTypes[0x09] = {
+            'len': 4,
+            'description': 'Reactive Energy Export T1',
+            'dataType': 'Uint32',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy exported in tariff T1 (in varh).'
+        };
+        dataTypes[0x0A] = {
+            'len': 4,
+            'description': 'Reactive Energy Export T2',
+            'dataType': 'Uint32',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy exported in tariff T2 (in varh).'
+        };
+        dataTypes[0x0B] = {
+            'len': 4,
+            'description': 'Active Power L123',
+            'dataType': 'Int32',
+            'unit': 'W',
+            'tooltip': 'Total active power for phases L1, L2, and L3 (in W).'
+        };
+        dataTypes[0x0C] = {
+            'len': 4,
+            'description': 'Active Power L1',
+            'dataType': 'Int32',
+            'unit': 'W',
+            'tooltip': 'Active power for phase L1 (in W).'
+        };
+        dataTypes[0x0D] = {
+            'len': 4,
+            'description': 'Active Power L2',
+            'dataType': 'Int32',
+            'unit': 'W',
+            'tooltip': 'Active power for phase L2 (in W).'
+        };
+        dataTypes[0x0E] = {
+            'len': 4,
+            'description': 'Active Power L3',
+            'dataType': 'Int32',
+            'unit': 'W',
+            'tooltip': 'Active power for phase L3 (in W).'
+        };
+        dataTypes[0x0F] = {
+            'len': 4,
+            'description': 'Current L123',
+            'dataType': 'Int32',
+            'unit': 'mA',
+            'tooltip': 'Total current for phases L1, L2, and L3 (in mA).'
+        };
+        dataTypes[0x10] = {
+            'len': 4,
+            'description': 'Current L1',
+            'dataType': 'Int32',
+            'unit': 'mA',
+            'tooltip': 'Current for phase L1 (in mA).'
+        };
+        dataTypes[0x11] = {
+            'len': 4,
+            'description': 'Current L2',
+            'dataType': 'Int32',
+            'unit': 'mA',
+            'tooltip': 'Current for phase L2 (in mA).'
+        };
+        dataTypes[0x12] = {
+            'len': 4,
+            'description': 'Current L3',
+            'dataType': 'Int32',
+            'unit': 'mA',
+            'tooltip': 'Current for phase L3 (in mA).'
+        };
+        dataTypes[0x13] = {
+            'len': 4,
+            'description': 'Current N',
+            'dataType': 'Int32',
+            'unit': 'mA',
+            'tooltip': 'Neutral current (in mA).'
+        };
+        dataTypes[0x14] = {
+            'len': 4,
+            'description': 'Voltage L1-N',
+            'dataType': 'Int32',
+            'unit': 'V/10',
+            'tooltip': 'Voltage between phase L1 and neutral (in V, divided by 10).'
+        };
+        dataTypes[0x15] = {
+            'len': 4,
+            'description': 'Voltage L2-N',
+            'dataType': 'Int32',
+            'unit': 'V/10',
+            'tooltip': 'Voltage between phase L2 and neutral (in V, divided by 10).'
+        };
+        dataTypes[0x16] = {
+            'len': 4,
+            'description': 'Voltage L3-N',
+            'dataType': 'Int32',
+            'unit': 'V/10',
+            'tooltip': 'Voltage between phase L3 and neutral (in V, divided by 10).'
+        };
+        dataTypes[0x17] = {
+            'len': 1,
+            'description': 'Powerfactor L1',
+            'dataType': 'Int8',
+            'unit': 'Cos φ',
+            'tooltip': 'Power factor for phase L1 (dimensionless).'
+        };
+        dataTypes[0x18] = {
+            'len': 1,
+            'description': 'Powerfactor L2',
+            'dataType': 'Int8',
+            'unit': 'Cos φ',
+            'tooltip': 'Power factor for phase L2 (dimensionless).'
+        };
+        dataTypes[0x19] = {
+            'len': 1,
+            'description': 'Powerfactor L3',
+            'dataType': 'Int8',
+            'unit': 'Cos φ',
+            'tooltip': 'Power factor for phase L3 (dimensionless).'
+        };
+        dataTypes[0x1A] = {
+            'len': 2,
+            'description': 'Frequency',
+            'dataType': 'Int16',
+            'unit': 'Hz',
+            'tooltip': 'Frequency of the power supply (in Hz).'
+        };
+        dataTypes[0x1B] = {
+            'len': 4,
+            'description': 'Active Power average',
+            'dataType': 'Int32',
+            'unit': 'W',
+            'tooltip': 'Average active power (in W).'
+        };
+        dataTypes[0x1C] = {
+            'len': 4,
+            'description': 'Active Energy Import T1 kWh',
+            'dataType': 'Uint32',
+            'unit': 'kWh',
+            'tooltip': 'Total active energy imported in tariff T1 (in kWh).'
+        };
+        dataTypes[0x1D] = {
+            'len': 4,
+            'description': 'Active Energy Import T2 kWh',
+            'dataType': 'Uint32',
+            'unit': 'kWh',
+            'tooltip': 'Total active energy imported in tariff T2 (in kWh).'
+        };
+        dataTypes[0x1E] = {
+            'len': 4,
+            'description': 'Active Energy Export T1 kWh',
+            'dataType': 'Uint32',
+            'unit': 'kWh',
+            'tooltip': 'Total active energy exported in tariff T1 (in kWh).'
+        };
+        dataTypes[0x1F] = {
+            'len': 4,
+            'description': 'Active Energy Export T2 kWh',
+            'dataType': 'Uint32',
+            'unit': 'kWh',
+            'tooltip': 'Total active energy exported in tariff T2 (in kWh).'
+        };
+        dataTypes[0x20] = {
+            'len': 4,
+            'description': 'Reactive Energy Import T1 kvarh',
+            'dataType': 'Uint32',
+            'unit': 'kvarh',
+            'tooltip': 'Total reactive energy imported in tariff T1 (in kvarh).'
+        };
+        dataTypes[0x21] = {
+            'len': 4,
+            'description': 'Reactive Energy Import T2 kvarh',
+            'dataType': 'Uint32',
+            'unit': 'kvarh',
+            'tooltip': 'Total reactive energy imported in tariff T2 (in kvarh).'
+        };
+        dataTypes[0x22] = {
+            'len': 4,
+            'description': 'Reactive Energy Export T1 kvarh',
+            'dataType': 'Uint32',
+            'unit': 'kvarh',
+            'tooltip': 'Total reactive energy exported in tariff T1 (in kvarh).'
+        };
+        dataTypes[0x23] = {
+            'len': 4,
+            'description': 'Reactive Energy Export T2 kvarh',
+            'dataType': 'Uint32',
+            'unit': 'kvarh',
+            'tooltip': 'Total reactive energy exported in tariff T2 (in kvarh).'
+        };
+        dataTypes[0x24] = {
+            'len': 8,
+            'description': 'Active Energy Import T1 64bit',
+            'dataType': 'Uint64',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy imported in tariff T1 (64-bit value in Wh).'
+        };
+        dataTypes[0x25] = {
+            'len': 8,
+            'description': 'Active Energy Import T2 64bit',
+            'dataType': 'Uint64',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy imported in tariff T2 (64-bit value in Wh).'
+        };
+        dataTypes[0x26] = {
+            'len': 8,
+            'description': 'Active Energy Export T1 64bit',
+            'dataType': 'Uint64',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy exported in tariff T1 (64-bit value in Wh).'
+        };
+        dataTypes[0x27] = {
+            'len': 8,
+            'description': 'Active Energy Export T2 64bit',
+            'dataType': 'Uint64',
+            'unit': 'Wh',
+            'tooltip': 'Total active energy exported in tariff T2 (64-bit value in Wh).'
+        };
+        dataTypes[0x28] = {
+            'len': 8,
+            'description': 'Reactive Energy Import T1 64bit',
+            'dataType': 'Uint64',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy imported in tariff T1 (64-bit value in varh).'
+        };
+        dataTypes[0x29] = {
+            'len': 8,
+            'description': 'Reactive Energy Import T2 64bit',
+            'dataType': 'Uint64',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy imported in tariff T2 (64-bit value in varh).'
+        };
+        dataTypes[0x2A] = {
+            'len': 8,
+            'description': 'Reactive Energy Export T1 64bit',
+            'dataType': 'Uint64',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy exported in tariff T1 (64-bit value in varh).'
+        };
+        dataTypes[0x2B] = {
+            'len': 8,
+            'description': 'Reactive Energy Export T2 64bit',
+            'dataType': 'Uint64',
+            'unit': 'varh',
+            'tooltip': 'Total reactive energy exported in tariff T2 (64-bit value in varh).'
+        };
+        dataTypes[0xF0] = {
+            'len': 1,
+            'description': 'errorcode',
+            'dataType': 'ErrorCode',
+            'tooltip': 'Error code indicating any issues or faults.'
+        };
+        dataTypes[0xF1] = {
+            'len': 4,
+            'description': 'serial-number',
+            'dataType': 'MeterSerial',
+            'tooltip': 'Serial number of the meter.'
+        };
+        dataTypes[0xF2] = {
+            'len': 4,
+            'description': 'factor-number',
+            'dataType': 'MeterSerial',
+            'tooltip': 'Factor number for calibration or identification.'
+        };
+        dataTypes[0xF3] = {
+            'len': 2,
+            'description': 'current-transformer primary',
+            'dataType': 'Uint16',
+            'tooltip': 'Primary current rating of the current transformer (in A).'
+        };
+        dataTypes[0xF4] = {
+            'len': 2,
+            'description': 'current-transformer secondary',
+            'dataType': 'Uint16',
+            'tooltip': 'Secondary current rating of the current transformer (in A).'
+        };
+        dataTypes[0xF5] = {
+            'len': 2,
+            'description': 'voltage-transformer primary',
+            'dataType': 'Uint16',
+            'tooltip': 'Primary voltage rating of the voltage transformer (in V).'
+        };
+        dataTypes[0xF6] = {
+            'len': 2,
+            'description': 'voltage-transformer secondary',
+            'dataType': 'Uint16',
+            'tooltip': 'Secondary voltage rating of the voltage transformer (in V).'
+        };
+        dataTypes[0xF7] = {
+            'len': 1,
+            'description': 'meter-type',
+            'dataType': 'Uint8',
+            'tooltip': 'Type of the meter.'
+        };
+        dataTypes[0xF8] = {
+            'len': 4,
+            'description': 'MID year',
+            'dataType': 'BCD',
+            'tooltip': 'Year of the MID certification.'
+        };
+        dataTypes[0xF9] = {
+            'len': 4,
+            'description': 'factory year',
+            'dataType': 'BCD',
+            'tooltip': 'Year the meter was manufactured.'
+        };
+        dataTypes[0xFA] = {
+            'len': 4,
+            'description': 'firmware version',
+            'dataType': 'ASCII',
+            'tooltip': 'Firmware version of the meter.'
+        };
+        dataTypes[0xFB] = {
+            'len': 4,
+            'description': 'mid-Version',
+            'dataType': 'ASCII',
+            'tooltip': 'Version of the MID certification.'
+        };
+        dataTypes[0xFC] = {
+            'len': 4,
+            'description': 'manufacturer',
+            'dataType': 'ASCII',
+            'tooltip': 'Manufacturer of the meter.'
+        };
+        dataTypes[0xFD] = {
+            'len': 4,
+            'description': 'hw-index',
+            'dataType': 'ASCII',
+            'tooltip': 'Hardware index or revision number.'
+        };
+        dataTypes[0xFE] = {
+            'len': 4,
+            'description': 'systemtime',
+            'dataType': 'Uint32',
+            'tooltip': 'Current system time of the meter (in seconds since epoch).'
+        };
 
         // Generate checkboxes
         var checkboxContainer = document.getElementById('checkboxContainer');
@@ -289,6 +694,19 @@
                 var myLabel = document.createElement("label");
                 myLabel.setAttribute("for", "f" + dataType['description']);
                 myLabel.innerHTML = dataType['description'];
+
+                // Tooltip icon
+                if (dataType['tooltip']) {
+                    var tooltipIcon = document.createElement("span");
+                    tooltipIcon.className = "tooltip-icon";
+                    tooltipIcon.innerHTML = "&#9432;"; // Information symbol
+                    var tooltipText = document.createElement("div");
+                    tooltipText.className = "tooltip-text";
+                    tooltipText.innerHTML = dataType['tooltip'];
+
+                    tooltipIcon.appendChild(tooltipText);
+                    checkboxDiv.appendChild(tooltipIcon);
+                }
 
                 checkboxDiv.appendChild(myInput);
                 checkboxDiv.appendChild(myLabel);
