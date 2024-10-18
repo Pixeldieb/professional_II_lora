@@ -754,7 +754,7 @@
             document.getElementById('ergebnishex').innerHTML = "No data selected";
         }
 
-        function doWork() {
+function doWork() {
             var data = {
                 'fPort': 1,
                 'timeInterval': 15,
@@ -765,18 +765,21 @@
             };
             let iMax = 10;
             var iCounter = 0;
-            var hasDataSelected = false;
             var form = document.getElementById('data');
+
+            // Flag to check if "Uplink should be confirmed" is selected
+            var isSndAckSelected = false;
+
             Array.from(form.elements).forEach(element => {
                 element.disabled = false;
                 if (element.type === "checkbox") {
                     if (element.checked && !element.disabled) {
                         if (element.id === "fPortConfirmed") {
                             data.sndAck = true;
+                            isSndAckSelected = true;
                         } else {
                             data.values.push(parseInt(element.value));
                             iCounter = iCounter + 1;
-                            hasDataSelected = true;
                         }
                     }
                 }
@@ -791,7 +794,8 @@
             }
             data.timeInterval = parseInt(document.getElementById('fInterval').value) || 1;
 
-            if (!hasDataSelected) {
+            // Modify the condition to generate payload when data values are selected or "Uplink should be confirmed" is checked
+            if (data.values.length === 0 && !data.sndAck) {
                 document.getElementById('ergebnis').innerHTML = "No data selected";
                 document.getElementById('ergebnishex').innerHTML = "No data selected";
                 document.getElementById('ergebnisbase64').innerHTML = "No data selected";
@@ -802,13 +806,6 @@
                 document.getElementById('ergebnishex').innerHTML = toHexString(erg, false);
                 document.getElementById('ergebnisbase64').innerHTML = base64EncArr(erg);
             }
-        }
-
-        function toHexString(byteArray, withLeadingZero) {
-            var filler = withLeadingZero ? '0x' : '';
-            return filler + Array.from(byteArray, function (byte) {
-                return ('0' + (byte & 0xFF).toString(16)).slice(-2).toUpperCase();
-            }).join(' ' + filler);
         }
 
         function Encode(fPort, data, variables) {
