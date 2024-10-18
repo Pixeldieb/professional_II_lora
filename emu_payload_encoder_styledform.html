@@ -14,12 +14,12 @@
     <style>
         /**
          * EMU Professional II LoRa-Payload Encoder
-         * Version: 1.0.1
+         * Version: 1.0.2
          * Author: Pixeldieb
          * Date: 2024-10-18
          * Description: This script generates a payload for the EMU Professional II datalogger entries
          *              based on user-selected options and encodes it in various formats.
-         *              Added tooltips for checkboxes and responsive checkbox layout.
+         *              Added information icons for tooltips and adjusted tooltip functionality.
          */
 
         body {
@@ -105,6 +105,7 @@
             flex: 1 1 calc(33.333% - 10px);
             display: flex;
             align-items: center;
+            position: relative;
         }
 
         .checkbox-group input {
@@ -144,17 +145,28 @@
         }
 
         /* Tooltip styles */
-        .checkbox-group label {
-            position: relative;
+        .info-icon {
+            margin-left: 5px;
+            color: #156FC1;
             cursor: pointer;
+            position: relative;
+            font-style: normal;
+            font-weight: bold;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            line-height: 16px;
+            border-radius: 50%;
+            border: 1px solid #156FC1;
         }
 
-        .checkbox-group label::after {
+        .info-icon::after {
             content: attr(data-tooltip);
             position: absolute;
             bottom: -5px;
-            left: 0;
-            transform: translateY(100%);
+            left: 50%;
+            transform: translate(-50%, 100%);
             background-color: #fff;
             color: #221F20;
             padding: 5px;
@@ -168,7 +180,7 @@
             z-index: 10;
         }
 
-        .checkbox-group label:hover::after {
+        .info-icon:hover::after {
             opacity: 1;
             visibility: visible;
         }
@@ -215,7 +227,7 @@
             <br>
             <h2>Datalogger Entries to be Sent:</h2>
             <div class="note">
-                Hover over each checkbox to see more information about that data type.
+                Click the <span class="info-icon">i</span> next to each checkbox to see more information about that data type.
             </div>
             <div class="checkbox-container" id="checkboxContainer">
                 <!-- Checkboxes will be generated here -->
@@ -226,12 +238,12 @@
     <script>
         /**
          * EMU Professional II LoRa-Payload Encoder
-         * Version: 1.0.1
+         * Version: 1.0.2
          * Author: Pixeldieb
          * Date: 2024-10-18
          * Description: This script generates a payload for the EMU Professional II datalogger entries
          *              based on user-selected options and encodes it in various formats.
-         *              Added tooltips for checkboxes and responsive checkbox layout.
+         *              Added information icons for tooltips and adjusted tooltip functionality.
          */
 
         var dataTypes = [];
@@ -285,13 +297,18 @@
                 myLabel.setAttribute("for", "f" + dataType['description']);
                 myLabel.innerHTML = dataType['description'];
 
+                // Create info icon for tooltip
+                var infoIcon = document.createElement("span");
+                infoIcon.className = "info-icon";
+                infoIcon.innerHTML = "i";
                 // Add tooltip if available
                 if (dataType['tooltip']) {
-                    myLabel.setAttribute("data-tooltip", dataType['tooltip']);
+                    infoIcon.setAttribute("data-tooltip", dataType['tooltip']);
                 }
 
                 checkboxDiv.appendChild(myInput);
                 checkboxDiv.appendChild(myLabel);
+                checkboxDiv.appendChild(infoIcon);
 
                 checkboxContainer.appendChild(checkboxDiv);
             }
