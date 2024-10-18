@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>EMU Professional II LoRa-Payload Encoder</title>
+    <title>EMU Professional II LoRa-Payload Encoder V0.1.5</title>
     <meta charset="UTF-8">
     <!-- Meta viewport tag for responsiveness -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,6 +47,14 @@
         #data h2 {
             margin-top: 20px;
         }
+
+        .checkbox-group {
+            margin-bottom: 5px;
+        }
+
+        .checkbox-group input {
+            margin-right: 5px;
+        }
     </style>
 </head>
 
@@ -91,6 +99,15 @@
 
     <!-- Place the script here -->
     <script lang="javascript">
+        /**
+         * EMU Professional II LoRa-Payload Encoder
+         * Version: 1.0.0
+         * Author: Your Name
+         * Date: YYYY-MM-DD
+         * Description: This script generates a payload for the EMU Professional II datalogger entries
+         *              based on user-selected options and encodes it in various formats.
+         */
+
         var dataTypes = [];
         dataTypes[0x00] = { 'len': 4, 'description': 'data-logger-index', 'dataType': 'Uint32' };
         dataTypes[0x01] = { 'len': 4, 'description': 'timestamp', 'dataType': 'Uint32', 'unit': 'seconds' };
@@ -152,26 +169,35 @@
         dataTypes[0xFD] = { 'len': 4, 'description': 'hw-index', 'dataType': 'ASCII' };
         dataTypes[0xFE] = { 'len': 4, 'description': 'systemtime', 'dataType': 'Uint32' };
 
-        // Generate checkboxes
-        for (var x = 0; x < dataTypes.length; x++) {
-            if (dataTypes[x]) {
-                var myLabel = document.createElement("label");
-                myLabel.setAttribute("for", "f" + dataTypes[x]['description']);
-                myLabel.innerHTML = dataTypes[x]['description'];
+        // Generate checkboxes using for...in loop
+        var form = document.getElementById('data');
+        for (var key in dataTypes) {
+            if (dataTypes.hasOwnProperty(key)) {
+                var x = parseInt(key);
+                var dataType = dataTypes[key];
+
+                var checkboxDiv = document.createElement("div");
+                checkboxDiv.className = "checkbox-group";
 
                 var myInput = document.createElement("input");
                 myInput.setAttribute("type", "checkbox");
-                myInput.setAttribute("id", "f" + dataTypes[x]['description']);
-                myInput.setAttribute("name", "f" + dataTypes[x]['description']);
+                myInput.setAttribute("id", "f" + dataType['description']);
+                myInput.setAttribute("name", "f" + dataType['description']);
                 myInput.setAttribute("onclick", "doWork();");
                 myInput.value = x;
 
-                document.getElementById("data").appendChild(myInput);
-                document.getElementById("data").appendChild(myLabel);
-                document.getElementById("data").appendChild(document.createElement('br'));
+                var myLabel = document.createElement("label");
+                myLabel.setAttribute("for", "f" + dataType['description']);
+                myLabel.innerHTML = dataType['description'];
+
+                checkboxDiv.appendChild(myInput);
+                checkboxDiv.appendChild(myLabel);
+
+                form.appendChild(checkboxDiv);
             }
         }
 
+        // Rest of the script remains the same
         function clearInput() {
             var form = document.getElementById('data');
             Array.from(form.elements).forEach(element => {
