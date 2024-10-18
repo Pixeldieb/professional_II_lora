@@ -131,13 +131,25 @@
             border-radius: 5px;
             position: absolute;
             z-index: 1;
-            bottom: 125%; /* Position above the icon */
-            left: 50%;
-            transform: translateX(-50%);
+            top: 50%;
+            left: 110%; /* Position to the right of the icon */
+            transform: translateY(-50%);
             opacity: 0;
             transition: opacity 0.3s;
             font-size: 12px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tooltip arrow */
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -5px;
+            margin-top: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent #ddd transparent transparent;
         }
 
         /* Show the tooltip text when hovering over the icon */
@@ -191,6 +203,16 @@
                 min-width: 100%;
                 margin-right: 0;
             }
+
+            /* Adjust tooltip position on small screens */
+            .tooltip-text {
+                left: -210px; /* Move tooltip to the left of the icon */
+            }
+
+            .tooltip-text::after {
+                left: 100%;
+                border-color: transparent transparent transparent #ddd;
+            }
         }
 
         /* Bottom section styling */
@@ -206,6 +228,7 @@
         }
     </style>
 </head>
+
 
 <body>
 
