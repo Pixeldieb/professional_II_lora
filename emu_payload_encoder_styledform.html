@@ -767,16 +767,12 @@ function doWork() {
             var iCounter = 0;
             var form = document.getElementById('data');
 
-            // Flag to check if "Uplink should be confirmed" is selected
-            var isSndAckSelected = false;
-
             Array.from(form.elements).forEach(element => {
                 element.disabled = false;
                 if (element.type === "checkbox") {
                     if (element.checked && !element.disabled) {
                         if (element.id === "fPortConfirmed") {
                             data.sndAck = true;
-                            isSndAckSelected = true;
                         } else {
                             data.values.push(parseInt(element.value));
                             iCounter = iCounter + 1;
@@ -794,7 +790,7 @@ function doWork() {
             }
             data.timeInterval = parseInt(document.getElementById('fInterval').value) || 1;
 
-            // Modify the condition to generate payload when data values are selected or "Uplink should be confirmed" is checked
+            // Always generate payload when sndAck is true or data values are selected
             if (data.values.length === 0 && !data.sndAck) {
                 document.getElementById('ergebnis').innerHTML = "No data selected";
                 document.getElementById('ergebnishex').innerHTML = "No data selected";
