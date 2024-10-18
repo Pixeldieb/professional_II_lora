@@ -13,7 +13,6 @@
         /* Root variables for customizable color schemes */
         :root {
             --primary-color: #0069b4;
-            --primary-color-hover: #005a9b;
             --secondary-color: #b6b9be;
             --background-color: #ffffff;
             --text-color: #333333;
@@ -24,7 +23,7 @@
         body {
             font-family: 'Raleway', sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background-color: var(--background-color);
             color: var(--text-color);
         }
@@ -32,7 +31,6 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
         }
 
         .header {
@@ -95,7 +93,7 @@
 
         /* Optional: Styling inputs */
         input[type="number"] {
-            width: 5em;
+            width: 6em;
             margin-right: 0.5em;
         }
 
@@ -160,7 +158,7 @@
 
         <form id="data" onsubmit="doWork(); return false;">
             <div class="number-input-group">
-                <input type="number" min="1" max="65535" oninput="doWork();" name="fInterval" id="fInterval" value="15">
+                <input type="number" min="1" max="65535" oninput="validity.valid||(value=''); doWork();" name="fInterval" id="fInterval" value="15">
                 <label for="fInterval">Interval in minutes (from 1 to 65535)</label>
             </div>
             <div class="checkbox-group">
@@ -173,194 +171,59 @@
         </form>
     </div>
 
-    <script lang="javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            var dataTypes = [];
-            dataTypes[0x00] = { 'len': 4, 'description': 'data-logger-index', 'dataType': 'Uint32' };
-            dataTypes[0x01] = { 'len': 4, 'description': 'timestamp', 'dataType': 'Uint32', 'unit': 'seconds' };
-            dataTypes[0x02] = { 'len': 4, 'description': 'timestamp-previous', 'dataType': 'Uint32', 'unit': 'seconds' };
-            dataTypes[0x03] = { 'len': 4, 'description': 'Active Energy Import T1', 'dataType': 'Uint32', 'unit': 'Wh', 'cfgdescription': 3, "cfgunit": 1, 'cfgtariff': 1 };
-            dataTypes[0x04] = { 'len': 4, 'description': 'Active Energy Import T2', 'dataType': 'Uint32', 'unit': 'Wh', 'cfgdescription': 3, "cfgunit": 1, 'cfgtariff': 2 };
-            // ... Include all other dataTypes ...
+    <script>
+        // Data types array
+        var dataTypes = [];
+        dataTypes[0x00] = { 'len': 4, 'description': 'data-logger-index', 'dataType': 'Uint32' };
+        dataTypes[0x01] = { 'len': 4, 'description': 'timestamp', 'dataType': 'Uint32', 'unit': 'seconds' };
+        dataTypes[0x02] = { 'len': 4, 'description': 'timestamp-previous', 'dataType': 'Uint32', 'unit': 'seconds' };
+        dataTypes[0x03] = { 'len': 4, 'description': 'Active Energy Import T1', 'dataType': 'Uint32', 'unit': 'Wh' };
+        dataTypes[0x04] = { 'len': 4, 'description': 'Active Energy Import T2', 'dataType': 'Uint32', 'unit': 'Wh' };
+        // ... Include all other dataTypes as in the original code ...
 
-            // Generate checkboxes dynamically
+        // Generate checkboxes dynamically
+        window.onload = function () {
+            var form = document.getElementById('data');
             for (var x = 0; x < dataTypes.length; x++) {
                 if (dataTypes[x]) {
                     var myDiv = document.createElement("div");
                     myDiv.classList.add("form-group");
 
                     var myInput = document.createElement("input");
-                    myInput.setAttribute("type", "checkbox");
-                    myInput.setAttribute("id", "f" + dataTypes[x]['description']);
-                    myInput.setAttribute("name", "f" + dataTypes[x]['description']);
-                    myInput.setAttribute("onclick", "doWork();");
+                    myInput.type = "checkbox";
+                    myInput.id = "f" + dataTypes[x]['description'];
+                    myInput.name = "f" + dataTypes[x]['description'];
+                    myInput.onclick = doWork;
                     myInput.value = x;
 
                     var myLabel = document.createElement("label");
-                    myLabel.setAttribute("for", "f" + dataTypes[x]['description']);
+                    myLabel.setAttribute("for", myInput.id);
                     myLabel.innerHTML = dataTypes[x]['description'];
 
                     myDiv.appendChild(myInput);
                     myDiv.appendChild(myLabel);
 
-                    document.getElementById("data").appendChild(myDiv);
+                    form.appendChild(myDiv);
                 }
             }
-
-            function clearInput() {
-                const form = document.getElementById('data');
-                Array.from(form.elements).forEach(element => {
-                    if (element.type === "checkbox") {
-                        element.checked = false;
-                        element.disabled = false;
-                    }
-                });
-                document.getElementById('ergebnis').innerHTML = "no data selected";
-                document.getElementById('ergebnisbase64').innerHTML = "no data selected";
-                document.getElementById('ergebnishex').innerHTML = "no data selected";
-            }
-
-            function doWork() {
-                var data = {
-                    'fPort': 1,
-                    'timeInterval': 15,
-                    'sndAck': false,
-                    'startReJoin': false,
-                    'portIsActive': true,
-                    'values': []
-                };
-                let iMax = 10;
-                var iCounter = 0;
-                const form = document.getElementById('data');
-                Array.from(form.elements).forEach(element => {
-                    element.disabled = false;
-                    if (element.type === "checkbox") {
-                        if (element.checked) {
-                            if (element.id === "fPortConfirmed") {
-                                data.sndAck = true;
-                            } else {
-                                data.values.push(parseInt(element.value));
-                                iCounter += 1;
-                            }
-                        }
-                    }
-                });
-
-                if (iCounter >= iMax) {
-                    Array.from(form.elements).forEach(element => {
-                        if (element.type === "checkbox" && !element.checked && element.id !== "fPortConfirmed") {
-                            element.disabled = true;
-                        }
-                    });
-                }
-                data.timeInterval = parseInt(document.getElementById('fInterval').value);
-
-                var erg = Encode(1, data, {});
-
-                document.getElementById('ergebnis').innerHTML = toHexString(erg, true);
-                document.getElementById('ergebnishex').innerHTML = toHexString(erg, false);
-                document.getElementById('ergebnisbase64').innerHTML = base64EncArr(erg);
-            }
-
-            function toHexString(byteArray, withLeadingZero) {
-                var filler = withLeadingZero ? '0x' : '';
-                return filler + Array.from(byteArray, function (byte) {
-                    return ('0' + (byte & 0xFF).toString(16)).slice(-2).toUpperCase();
-                }).join(' ' + filler)
-            }
-
-            function Encode(fPort, data, variables) {
-                var bytes = [];
-
-                // Make sure the time is valid and between 1 and 65535
-                data.timeInterval = Math.min(data.timeInterval, 0xFFFF);
-                data.timeInterval = Math.max(data.timeInterval, 1);
-
-                // Push second byte to first position
-                bytes.push(data.timeInterval & 0x00FF);
-                // Push first byte to second position
-                bytes.push(data.timeInterval >> 8);
-
-                var configFlags = 0x00;
-                // Send Acknowledge for each Uplink back
-                if (data.sndAck) {
-                    configFlags |= 0x02;
-                }
-                // Start Re-Join
-                if (data.startReJoin) {
-                    configFlags |= 0x04;
-                }
-                // Enable this port so it sends data
-                if (data.portIsActive) {
-                    configFlags |= 0x08;
-                }
-
-                // Push the config flag on the stack
-                bytes.push(configFlags);
-                for (var i = 0; i < data.values.length; i++) {
-                    bytes.push(data.values[i]);
-                }
-                // Apply crc-8
-                var crc8 = crc8_encode(bytes);
-                bytes.push(crc8);
-
-                return bytes;
-            }
-
-            function crc8_encode(data) {
-                var xorOut = 0x0000;
-                var table = [
-                    // ... Your CRC table values ...
-                ];
-                var crc = 0x0000;
-                for (var j = 0; j < data.length; j++) {
-                    crc = table[crc ^ data[j]];
-                }
-                return (crc ^ xorOut) & 0xFFFF;
-            }
-
-            function base64EncArr(aBytes) {
-                let nMod3 = 2;
-                let sB64Enc = "";
-
-                const nLen = aBytes.length;
-                let nUint24 = 0;
-                for (let nIdx = 0; nIdx < nLen; nIdx++) {
-                    nMod3 = nIdx % 3;
-                    nUint24 |= aBytes[nIdx] << ((16 >>> nMod3) & 24);
-                    if (nMod3 === 2 || aBytes.length - nIdx === 1) {
-                        sB64Enc += String.fromCodePoint(
-                            uint6ToB64((nUint24 >>> 18) & 63),
-                            uint6ToB64((nUint24 >>> 12) & 63),
-                            uint6ToB64((nUint24 >>> 6) & 63),
-                            uint6ToB64(nUint24 & 63)
-                        );
-                        nUint24 = 0;
-                    }
-                }
-                return (
-                    sB64Enc.substr(0, sB64Enc.length - 2 + nMod3) +
-                    (nMod3 === 2 ? "" : nMod3 === 1 ? "=" : "==")
-                );
-            }
-
-            function uint6ToB64(nUint6) {
-                return nUint6 < 26
-                    ? nUint6 + 65
-                    : nUint6 < 52
-                        ? nUint6 + 71
-                        : nUint6 < 62
-                            ? nUint6 - 4
-                            : nUint6 === 62
-                                ? 43
-                                : nUint6 === 63
-                                    ? 47
-                                    : 65;
-            }
-
             // Initialize the form by calling doWork()
             doWork();
-        });
-    </script>
-</body>
-</html>
+        };
+
+        function clearInput() {
+            var form = document.getElementById('data');
+            Array.from(form.elements).forEach(element => {
+                if (element.type === "checkbox") {
+                    element.checked = false;
+                    element.disabled = false;
+                }
+            });
+            document.getElementById('ergebnis').innerHTML = "no data selected";
+            document.getElementById('ergebnisbase64').innerHTML = "no data selected";
+            document.getElementById('ergebnishex').innerHTML = "no data selected";
+        }
+
+        function doWork() {
+            var data = {
+                'fPort': 1,
+                'timeI
