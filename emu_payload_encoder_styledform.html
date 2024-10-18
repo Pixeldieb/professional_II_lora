@@ -1,67 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <title>EMU Professional II LoRa-Payload Encoder</title>
+    <title>EMU Professional II Lora-Payload Encoder</title>
     <meta charset="UTF-8">
 
-    <!-- Meta viewport tag for responsiveness -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Optional: Include a Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
-        /**
-         * EMU Professional II LoRa-Payload Encoder
-         * Version: 1.0.2
-         * Author: Pixeldieb
-         * Date: 2024-10-18
-         * Description: This script generates a payload for the EMU Professional II datalogger entries
-         *              based on user-selected options and encodes it in various formats.
-         *              Added information icons for tooltips and adjusted tooltip functionality.
-         */
-
+        /* Your original styles, adjusted for better display */
         body {
             font-family: 'Raleway', sans-serif;
             margin: 20px;
-            color: #221F20;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .header img {
-            max-width: 150px;
-            height: auto;
+        .right {
+            float: right;
         }
 
         h1 {
+            text-align: left;
             font-size: 24px;
-            color: #156FC1;
+            font-weight: bold;
             margin-bottom: 10px;
+            color: #156FC1;
         }
 
         h2 {
+            text-align: left;
             font-size: 20px;
-            color: #156FC1;
+            font-weight: bold;
             margin-bottom: 10px;
-        }
-
-        .note {
-            font-size: 14px;
-            margin-bottom: 20px;
-            color: #221F20;
+            color: #156FC1;
         }
 
         .boxergebnis {
@@ -76,15 +44,6 @@
             color: #156FC1;
         }
 
-        .boxergebnis div {
-            margin-bottom: 10px;
-            color: #221F20;
-        }
-
-        #data {
-            max-width: 800px;
-        }
-
         #data input[type='number'] {
             width: 5em;
             margin-right: 5px;
@@ -95,17 +54,10 @@
             color: #221F20;
         }
 
-        .checkbox-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
         .checkbox-group {
-            flex: 1 1 calc(33.333% - 10px);
+            margin-bottom: 5px;
             display: flex;
             align-items: center;
-            position: relative;
         }
 
         .checkbox-group input {
@@ -114,174 +66,70 @@
         }
 
         .checkbox-group label {
+            flex: 1;
             color: #221F20;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-            }
-
-            .boxergebnis {
-                display: block;
-                margin-right: 0;
-                margin-bottom: 20px;
-            }
-
-            #data input[type='number'] {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-
-            .checkbox-group {
-                flex: 1 1 100%;
-            }
         }
 
         /* Style for the "Uplink should be confirmed" checkbox */
         #fPortConfirmed + label {
             color: #EE1D24;
         }
-
-        /* Tooltip styles */
-        .info-icon {
-            margin-left: 5px;
-            color: #156FC1;
-            cursor: pointer;
-            position: relative;
-            font-style: normal;
-            font-weight: bold;
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            text-align: center;
-            line-height: 16px;
-            border-radius: 50%;
-            border: 1px solid #156FC1;
-        }
-
-        .info-icon::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translate(-50%, 100%);
-            background-color: #fff;
-            color: #221F20;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s;
-            width: 200px;
-            z-index: 10;
-        }
-
-        .info-icon:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1>EMU Professional II LoRa-Payload Encoder</h1>
-            <img alt="EMULogo" src="https://www.emuag.ch/profII/EMU.svg" />
+    <div class="right">
+        <img alt="EMULogo" width="150px" height="100px" src="https://www.emuag.ch/profII/EMU.svg" />
+    </div>
+    <h1>EMU Professional II Lora-Payload Encoder</h1>
+
+    <div class="boxergebnis">
+        <div><b> Payload base64-encoded:</b>
+            <div name="ergebnisbase64" id="ergebnisbase64"> no data selected </div>
         </div>
-
-        <div class="boxergebnis">
-            <div><b>Payload base64-encoded:</b>
-                <div id="ergebnisbase64">No data selected</div>
-            </div>
-        </div>
-
-        <div class="boxergebnis">
-            <div><b>Payload hex-encoded:</b>
-                <div id="ergebnis">No data selected</div>
-            </div>
-        </div>
-
-        <div class="boxergebnis">
-            <div><b>Payload hex-encoded without leading 0x:</b>
-                <div id="ergebnishex">No data selected</div>
-            </div>
-        </div>
-
-        <br />
-        <br />
-        <form id="data" onsubmit="doWork(); return false;">
-
-            <input type="number" min="1" max="65535" oninput="doWork();"
-                name="fInterval" id="fInterval"
-                value="15"> <label for="fInterval">Interval in minutes (from 1 to 65535)</label><br />
-            <div class="checkbox-group">
-                <input type="checkbox" onchange="doWork();" name="fPortConfirmed" id="fPortConfirmed">
-                <label for="fPortConfirmed">Uplink should be confirmed</label>
-            </div>
-            <br>
-            <h2>Datalogger Entries to be Sent:</h2>
-            <div class="note">
-                Click the <span class="info-icon">i</span> next to each checkbox to see more information about that data type.
-            </div>
-            <div class="checkbox-container" id="checkboxContainer">
-                <!-- Checkboxes will be generated here -->
-            </div>
-        </form>
     </div>
 
+    <div class="boxergebnis">
+        <div><b> Payload hex-encoded:</b>
+            <div name="ergebnis" id="ergebnis"> no data selected </div>
+        </div>
+    </div>
+
+    <div class="boxergebnis">
+        <div><b> Payload hex-encoded without leading 0x:</b>
+            <div name="ergebnis" id="ergebnishex"> no data selected </div>
+        </div>
+    </div>
+
+    <br />
+    <br />
+    <form id="data" onsubmit="doWork(); return false;">
+
+        <input type="number" min="1" max="65535" oninput="doWork();"
+            name="fInterval" id="fInterval"
+            value="15"> <label for="fInterval">Interval in minutes (from 1 to 65535)</label><br />
+        <input type="checkbox" onchange="doWork();" name="fPortConfirmed" id="fPortConfirmed"> <label
+            for="fPortConfirmed">Uplink should be confirmed</label><br />
+        <br>
+        <h2>Datalogger Entries which should be sent:</h2>
+        <br />
+    </form>
+
     <script>
-        /**
-         * EMU Professional II LoRa-Payload Encoder
-         * Version: 1.0.2
-         * Author: Pixeldieb
-         * Date: 2024-10-18
-         * Description: This script generates a payload for the EMU Professional II datalogger entries
-         *              based on user-selected options and encodes it in various formats.
-         *              Added information icons for tooltips and adjusted tooltip functionality.
-         */
-
         var dataTypes = [];
-        dataTypes[0x00] = {
-            'len': 4,
-            'description': 'data-logger-index',
-            'dataType': 'Uint32',
-            'tooltip': 'The index of the data logger entry.'
-        };
-        dataTypes[0x01] = {
-            'len': 4,
-            'description': 'timestamp',
-            'dataType': 'Uint32',
-            'unit': 'seconds',
-            'tooltip': 'Timestamp of the current reading in seconds.'
-        };
-        dataTypes[0x02] = {
-            'len': 4,
-            'description': 'timestamp-previous',
-            'dataType': 'Uint32',
-            'unit': 'seconds',
-            'tooltip': 'Timestamp of the previous reading in seconds.'
-        };
-        dataTypes[0x03] = {
-            'len': 4,
-            'description': 'Active Energy Import T1',
-            'dataType': 'Uint32',
-            'unit': 'Wh',
-            'tooltip': 'Active energy imported in tariff T1 (in Wh).'
-        };
-        // ... (Add tooltips for other data types similarly) ...
+        dataTypes[0x00] = { 'len': 4, 'description': 'data-logger-index', 'dataType': 'Uint32' };
+        dataTypes[0x01] = { 'len': 4, 'description': 'timestamp', 'dataType': 'Uint32', 'unit': 'seconds' };
+        dataTypes[0x02] = { 'len': 4, 'description': 'timestamp-previous', 'dataType': 'Uint32', 'unit': 'seconds' };
+        dataTypes[0x03] = { 'len': 4, 'description': 'Active Energy Import T1', 'dataType': 'Uint32', 'unit': 'Wh' };
+        dataTypes[0x04] = { 'len': 4, 'description': 'Active Energy Import T2', 'dataType': 'Uint32', 'unit': 'Wh' };
+        // ... (rest of your dataTypes definitions) ...
 
-        // Generate checkboxes using for...in loop
-        var checkboxContainer = document.getElementById('checkboxContainer');
-        for (var key in dataTypes) {
-            if (dataTypes.hasOwnProperty(key)) {
-                var x = parseInt(key);
-                var dataType = dataTypes[key];
+        // Generate checkboxes
+        var form = document.getElementById('data');
+        for (var x in dataTypes) {
+            if (dataTypes.hasOwnProperty(x)) {
+                var dataType = dataTypes[x];
 
                 var checkboxDiv = document.createElement("div");
                 checkboxDiv.className = "checkbox-group";
@@ -297,20 +145,10 @@
                 myLabel.setAttribute("for", "f" + dataType['description']);
                 myLabel.innerHTML = dataType['description'];
 
-                // Create info icon for tooltip
-                var infoIcon = document.createElement("span");
-                infoIcon.className = "info-icon";
-                infoIcon.innerHTML = "i";
-                // Add tooltip if available
-                if (dataType['tooltip']) {
-                    infoIcon.setAttribute("data-tooltip", dataType['tooltip']);
-                }
-
                 checkboxDiv.appendChild(myInput);
                 checkboxDiv.appendChild(myLabel);
-                checkboxDiv.appendChild(infoIcon);
 
-                checkboxContainer.appendChild(checkboxDiv);
+                form.appendChild(checkboxDiv);
             }
         }
 
@@ -322,9 +160,9 @@
                     element.disabled = false;
                 }
             });
-            document.getElementById('ergebnis').innerHTML = "No data selected";
-            document.getElementById('ergebnisbase64').innerHTML = "No data selected";
-            document.getElementById('ergebnishex').innerHTML = "No data selected";
+            document.getElementById('ergebnis').innerHTML = "no data selected";
+            document.getElementById('ergebnisbase64').innerHTML = "no data selected";
+            document.getElementById('ergebnishex').innerHTML = "no data selected";
         }
 
         function doWork() {
@@ -338,19 +176,16 @@
             };
             let iMax = 10;
             var iCounter = 0;
-            var hasDataSelected = false;
             var form = document.getElementById('data');
-
             Array.from(form.elements).forEach(element => {
                 element.disabled = false;
                 if (element.type === "checkbox") {
-                    if (element.checked) {
+                    if (element.checked && !element.disabled) {
                         if (element.id === "fPortConfirmed") {
                             data.sndAck = true;
                         } else {
                             data.values.push(parseInt(element.value));
-                            iCounter += 1;
-                            hasDataSelected = true;
+                            iCounter = iCounter + 1;
                         }
                     }
                 }
@@ -358,24 +193,18 @@
 
             if (iCounter >= iMax) {
                 Array.from(form.elements).forEach(element => {
-                    if (element.type === "checkbox" && !element.checked && element.id !== "fPortConfirmed") {
-                        element.disabled = true;
+                    if ((element.id !== 'fInterval') && (element.id !== 'fPortConfirmed')) {
+                        if (!element.checked) { element.disabled = true; }
                     }
                 });
             }
-            data.timeInterval = parseInt(document.getElementById('fInterval').value) || 1;
+            data.timeInterval = parseInt(document.getElementById('fInterval').value);
 
-            if (!hasDataSelected) {
-                document.getElementById('ergebnis').innerHTML = "No data selected";
-                document.getElementById('ergebnishex').innerHTML = "No data selected";
-                document.getElementById('ergebnisbase64').innerHTML = "No data selected";
-            } else {
-                var erg = Encode(1, data, {});
+            var erg = Encode(1, data, {});
 
-                document.getElementById('ergebnis').innerHTML = toHexString(erg, true);
-                document.getElementById('ergebnishex').innerHTML = toHexString(erg, false);
-                document.getElementById('ergebnisbase64').innerHTML = base64EncArr(erg);
-            }
+            document.getElementById('ergebnis').innerHTML = toHexString(erg, true);
+            document.getElementById('ergebnishex').innerHTML = toHexString(erg, false);
+            document.getElementById('ergebnisbase64').innerHTML = base64EncArr(erg);
         }
 
         function toHexString(byteArray, withLeadingZero) {
@@ -388,9 +217,11 @@
         function Encode(fPort, data, variables) {
             var bytes = [];
 
+            // Ensure timeInterval is between 1 and 65535
             data.timeInterval = Math.min(data.timeInterval, 0xFFFF);
             data.timeInterval = Math.max(data.timeInterval, 1);
 
+            // Push timeInterval bytes
             bytes.push(data.timeInterval & 0x00FF);
             bytes.push((data.timeInterval >> 8) & 0xFF);
 
@@ -405,10 +236,15 @@
                 configFlags |= 0x08;
             }
 
+            // Push configFlags
             bytes.push(configFlags);
+
+            // Push selected values
             for (var i = 0; i < data.values.length; i++) {
-                bytes.push(data.values[i]);
+                bytes.push(parseInt(data.values[i]));
             }
+
+            // Calculate CRC-8
             var crc8 = crc8_encode(bytes);
             bytes.push(crc8);
 
@@ -419,48 +255,8 @@
             var xorOut = 0x00;
             var table = [
                 0x00, 0x07, 0x0E, 0x09, 0x1C, 0x1B,
-                0x12, 0x15, 0x38, 0x3F, 0x36, 0x31,
-                0x24, 0x23, 0x2A, 0x2D, 0x70, 0x77,
-                0x7E, 0x79, 0x6C, 0x6B, 0x62, 0x65,
-                0x48, 0x4F, 0x46, 0x41, 0x54, 0x53,
-                0x5A, 0x5D, 0xE0, 0xE7, 0xEE, 0xE9,
-                0xFC, 0xFB, 0xF2, 0xF5, 0xD8, 0xDF,
-                0xD6, 0xD1, 0xC4, 0xC3, 0xCA, 0xCD,
-                0x90, 0x97, 0x9E, 0x99, 0x8C, 0x8B,
-                0x82, 0x85, 0xA8, 0xAF, 0xA6, 0xA1,
-                0xB4, 0xB3, 0xBA, 0xBD, 0xC7, 0xC0,
-                0xC9, 0xCE, 0xDB, 0xDC, 0xD5, 0xD2,
-                0xFF, 0xF8, 0xF1, 0xF6, 0xE3, 0xE4,
-                0xED, 0xEA, 0xB7, 0xB0, 0xB9, 0xBE,
-                0xAB, 0xAC, 0xA5, 0xA2, 0x8F, 0x88,
-                0x81, 0x86, 0x93, 0x94, 0x9D, 0x9A,
-                0x27, 0x20, 0x29, 0x2E, 0x3B, 0x3C,
-                0x35, 0x32, 0x1F, 0x18, 0x11, 0x16,
-                0x03, 0x04, 0x0D, 0x0A, 0x57, 0x50,
-                0x59, 0x5E, 0x4B, 0x4C, 0x45, 0x42,
-                0x6F, 0x68, 0x61, 0x66, 0x73, 0x74,
-                0x7D, 0x7A, 0x89, 0x8E, 0x87, 0x80,
-                0x95, 0x92, 0x9B, 0x9C, 0xB1, 0xB6,
-                0xBF, 0xB8, 0xAD, 0xAA, 0xA3, 0xA4,
-                0xF9, 0xFE, 0xF7, 0xF0, 0xE5, 0xE2,
-                0xEB, 0xEC, 0xC1, 0xC6, 0xCF, 0xC8,
-                0xDD, 0xDA, 0xD3, 0xD4, 0x69, 0x6E,
-                0x67, 0x60, 0x75, 0x72, 0x7B, 0x7C,
-                0x51, 0x56, 0x5F, 0x58, 0x4D, 0x4A,
-                0x43, 0x44, 0x19, 0x1E, 0x17, 0x10,
-                0x05, 0x02, 0x0B, 0x0C, 0x21, 0x26,
-                0x2F, 0x28, 0x3D, 0x3A, 0x33, 0x34,
-                0x4E, 0x49, 0x40, 0x47, 0x52, 0x55,
-                0x5C, 0x5B, 0x76, 0x71, 0x78, 0x7F,
-                0x6A, 0x6D, 0x64, 0x63, 0x3E, 0x39,
-                0x30, 0x37, 0x22, 0x25, 0x2C, 0x2B,
-                0x06, 0x01, 0x08, 0x0F, 0x1A, 0x1D,
-                0x14, 0x13, 0xAE, 0xA9, 0xA0, 0xA7,
-                0xB2, 0xB5, 0xBC, 0xBB, 0x96, 0x91,
-                0x98, 0x9F, 0x8A, 0x8D, 0x84, 0x83,
-                0xDE, 0xD9, 0xD0, 0xD7, 0xC2, 0xC5,
-                0xCC, 0xCB, 0xE6, 0xE1, 0xE8, 0xEF,
-                0xFA, 0xFD, 0xF4, 0xF3
+                // ... (rest of the CRC table) ...
+                0xF3
             ];
             var crc = 0x00;
             for (var j = 0; j < data.length; j++) {
