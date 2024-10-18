@@ -77,37 +77,7 @@
             overflow-wrap: anywhere;
         }
 
-
-            min-width: 300px;
-            margin-top: 10px;
-            margin-right: 20px;
-            word-wrap: break-word;
-            padding: 10px;
-            border: 2px solid var(--main-color);
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #f9f9f9;
-        }
-
-        .boxergebnis:hover {
-            background-color: #eef7ff;
-        }
-
-        .boxergebnis b {
-            color: var(--main-color);
-            font-size: 1.2em;
-        }
-
-        .payload-display {
-            font-family: 'Roboto Mono', monospace;
-            font-size: calc(var(--title-font-size) * 1.2);
-            color: #221F20;
-            margin-top: 10px;
-            word-break: break-all;
-            overflow-wrap: anywhere;
-        }
-
-                #data input[type='number'] {
+        #data input[type='number'] {
             width: 5em;
             margin-right: 5px;
         }
@@ -119,15 +89,15 @@
 
         .checkbox-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .checkbox-group {
-            flex: 1 1 calc(33.333% - 10px);
             display: flex;
             align-items: center;
             position: relative;
+            margin-bottom: 5px;
         }
 
         .checkbox-group input {
@@ -187,14 +157,12 @@
             visibility: visible;
             opacity: 1;
         }
-
         /* Style for the "Uplink should be confirmed" checkbox */
         #fPortConfirmed + label {
             color: #EE1D24;
         }
 
-
-                /* Popup message styles */
+        /* Popup message styles */
         #popup-message {
             display: none;
             position: fixed;
@@ -256,6 +224,18 @@
         .bottom-section p {
             margin-bottom: 10px;
             line-height: 1.5;
+        }
+
+        /* Section styling */
+        .section {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .section h3 {
+            margin-top: 0;
+            color: var(--main-color);
         }
     </style>
 </head>
@@ -326,449 +306,535 @@
             This encoder helps you configure the EMU Professional II LoRa device by generating the appropriate payloads for downlink messages. Use it to customize your data collection intervals and select specific data points to monitor.
         </p>
     </div>
-
-    <script>
+       <script>
         // The script runs after the DOM elements are available
 
         var dataTypes = [];
+        // Add dataTypes with category property
         dataTypes[0x00] = {
             'len': 4,
             'description': 'data-logger-index',
             'dataType': 'Uint32',
-            'tooltip': 'Unique index of the data logger entry.'
+            'tooltip': 'Unique index of the data logger entry.',
+            'category': 'Timestamps and Indexes'
         };
         dataTypes[0x01] = {
             'len': 4,
             'description': 'timestamp',
             'dataType': 'Uint32',
             'unit': 'seconds',
-            'tooltip': 'Timestamp of the current data logger entry in seconds since epoch.'
+            'tooltip': 'Timestamp of the current data logger entry in seconds since epoch.',
+            'category': 'Timestamps and Indexes'
         };
         dataTypes[0x02] = {
             'len': 4,
             'description': 'timestamp-previous',
             'dataType': 'Uint32',
             'unit': 'seconds',
-            'tooltip': 'Timestamp of the previous data logger entry in seconds since epoch.'
+            'tooltip': 'Timestamp of the previous data logger entry in seconds since epoch.',
+            'category': 'Timestamps and Indexes'
         };
         dataTypes[0x03] = {
             'len': 4,
             'description': 'Active Energy Import T1',
             'dataType': 'Uint32',
             'unit': 'Wh',
-            'tooltip': 'Total active energy imported in tariff T1 (in Wh).'
+            'tooltip': 'Total active energy imported in tariff T1 (in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x04] = {
             'len': 4,
             'description': 'Active Energy Import T2',
             'dataType': 'Uint32',
             'unit': 'Wh',
-            'tooltip': 'Total active energy imported in tariff T2 (in Wh).'
+            'tooltip': 'Total active energy imported in tariff T2 (in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x05] = {
             'len': 4,
             'description': 'Active Energy Export T1',
             'dataType': 'Uint32',
             'unit': 'Wh',
-            'tooltip': 'Total active energy exported in tariff T1 (in Wh).'
+            'tooltip': 'Total active energy exported in tariff T1 (in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x06] = {
             'len': 4,
             'description': 'Active Energy Export T2',
             'dataType': 'Uint32',
             'unit': 'Wh',
-            'tooltip': 'Total active energy exported in tariff T2 (in Wh).'
+            'tooltip': 'Total active energy exported in tariff T2 (in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x07] = {
             'len': 4,
             'description': 'Reactive Energy Import T1',
             'dataType': 'Uint32',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy imported in tariff T1 (in varh).'
+            'tooltip': 'Total reactive energy imported in tariff T1 (in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x08] = {
             'len': 4,
             'description': 'Reactive Energy Import T2',
             'dataType': 'Uint32',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy imported in tariff T2 (in varh).'
+            'tooltip': 'Total reactive energy imported in tariff T2 (in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x09] = {
             'len': 4,
             'description': 'Reactive Energy Export T1',
             'dataType': 'Uint32',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy exported in tariff T1 (in varh).'
+            'tooltip': 'Total reactive energy exported in tariff T1 (in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x0A] = {
             'len': 4,
             'description': 'Reactive Energy Export T2',
             'dataType': 'Uint32',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy exported in tariff T2 (in varh).'
+            'tooltip': 'Total reactive energy exported in tariff T2 (in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x0B] = {
             'len': 4,
             'description': 'Active Power L123',
             'dataType': 'Int32',
             'unit': 'W',
-            'tooltip': 'Total active power for phases L1, L2, and L3 (in W).'
+            'tooltip': 'Total active power for phases L1, L2, and L3 (in W).',
+            'category': 'Power Measurements'
         };
         dataTypes[0x0C] = {
             'len': 4,
             'description': 'Active Power L1',
             'dataType': 'Int32',
             'unit': 'W',
-            'tooltip': 'Active power for phase L1 (in W).'
+            'tooltip': 'Active power for phase L1 (in W).',
+            'category': 'Power Measurements'
         };
         dataTypes[0x0D] = {
             'len': 4,
             'description': 'Active Power L2',
             'dataType': 'Int32',
             'unit': 'W',
-            'tooltip': 'Active power for phase L2 (in W).'
+            'tooltip': 'Active power for phase L2 (in W).',
+            'category': 'Power Measurements'
         };
         dataTypes[0x0E] = {
             'len': 4,
             'description': 'Active Power L3',
             'dataType': 'Int32',
             'unit': 'W',
-            'tooltip': 'Active power for phase L3 (in W).'
+            'tooltip': 'Active power for phase L3 (in W).',
+            'category': 'Power Measurements'
         };
         dataTypes[0x0F] = {
             'len': 4,
             'description': 'Current L123',
             'dataType': 'Int32',
             'unit': 'mA',
-            'tooltip': 'Total current for phases L1, L2, and L3 (in mA).'
+            'tooltip': 'Total current for phases L1, L2, and L3 (in mA).',
+            'category': 'Current Measurements'
         };
         dataTypes[0x10] = {
             'len': 4,
             'description': 'Current L1',
             'dataType': 'Int32',
             'unit': 'mA',
-            'tooltip': 'Current for phase L1 (in mA).'
+            'tooltip': 'Current for phase L1 (in mA).',
+            'category': 'Current Measurements'
         };
         dataTypes[0x11] = {
             'len': 4,
             'description': 'Current L2',
             'dataType': 'Int32',
             'unit': 'mA',
-            'tooltip': 'Current for phase L2 (in mA).'
+            'tooltip': 'Current for phase L2 (in mA).',
+            'category': 'Current Measurements'
         };
         dataTypes[0x12] = {
             'len': 4,
             'description': 'Current L3',
             'dataType': 'Int32',
             'unit': 'mA',
-            'tooltip': 'Current for phase L3 (in mA).'
+            'tooltip': 'Current for phase L3 (in mA).',
+            'category': 'Current Measurements'
         };
         dataTypes[0x13] = {
             'len': 4,
             'description': 'Current N',
             'dataType': 'Int32',
             'unit': 'mA',
-            'tooltip': 'Neutral current (in mA).'
+            'tooltip': 'Neutral current (in mA).',
+            'category': 'Current Measurements'
         };
         dataTypes[0x14] = {
             'len': 4,
             'description': 'Voltage L1-N',
             'dataType': 'Int32',
             'unit': 'V/10',
-            'tooltip': 'Voltage between phase L1 and neutral (in V, divided by 10).'
+            'tooltip': 'Voltage between phase L1 and neutral (in V, divided by 10).',
+            'category': 'Voltage Measurements'
         };
         dataTypes[0x15] = {
             'len': 4,
             'description': 'Voltage L2-N',
             'dataType': 'Int32',
             'unit': 'V/10',
-            'tooltip': 'Voltage between phase L2 and neutral (in V, divided by 10).'
+            'tooltip': 'Voltage between phase L2 and neutral (in V, divided by 10).',
+            'category': 'Voltage Measurements'
         };
         dataTypes[0x16] = {
             'len': 4,
             'description': 'Voltage L3-N',
             'dataType': 'Int32',
             'unit': 'V/10',
-            'tooltip': 'Voltage between phase L3 and neutral (in V, divided by 10).'
+            'tooltip': 'Voltage between phase L3 and neutral (in V, divided by 10).',
+            'category': 'Voltage Measurements'
         };
         dataTypes[0x17] = {
             'len': 1,
             'description': 'Powerfactor L1',
             'dataType': 'Int8',
             'unit': 'Cos φ',
-            'tooltip': 'Power factor for phase L1 (dimensionless).'
+            'tooltip': 'Power factor for phase L1 (dimensionless).',
+            'category': 'Power Factor'
         };
         dataTypes[0x18] = {
             'len': 1,
             'description': 'Powerfactor L2',
             'dataType': 'Int8',
             'unit': 'Cos φ',
-            'tooltip': 'Power factor for phase L2 (dimensionless).'
+            'tooltip': 'Power factor for phase L2 (dimensionless).',
+            'category': 'Power Factor'
         };
         dataTypes[0x19] = {
             'len': 1,
             'description': 'Powerfactor L3',
             'dataType': 'Int8',
             'unit': 'Cos φ',
-            'tooltip': 'Power factor for phase L3 (dimensionless).'
+            'tooltip': 'Power factor for phase L3 (dimensionless).',
+            'category': 'Power Factor'
         };
         dataTypes[0x1A] = {
             'len': 2,
             'description': 'Frequency',
             'dataType': 'Int16',
             'unit': 'Hz',
-            'tooltip': 'Frequency of the power supply (in Hz).'
+            'tooltip': 'Frequency of the power supply (in Hz).',
+            'category': 'Frequency'
         };
         dataTypes[0x1B] = {
             'len': 4,
             'description': 'Active Power average',
             'dataType': 'Int32',
             'unit': 'W',
-            'tooltip': 'Average active power (in W).'
+            'tooltip': 'Average active power (in W).',
+            'category': 'Power Measurements'
         };
         dataTypes[0x1C] = {
             'len': 4,
             'description': 'Active Energy Import T1 kWh',
             'dataType': 'Uint32',
             'unit': 'kWh',
-            'tooltip': 'Total active energy imported in tariff T1 (in kWh).'
+            'tooltip': 'Total active energy imported in tariff T1 (in kWh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x1D] = {
             'len': 4,
             'description': 'Active Energy Import T2 kWh',
             'dataType': 'Uint32',
             'unit': 'kWh',
-            'tooltip': 'Total active energy imported in tariff T2 (in kWh).'
+            'tooltip': 'Total active energy imported in tariff T2 (in kWh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x1E] = {
             'len': 4,
             'description': 'Active Energy Export T1 kWh',
             'dataType': 'Uint32',
             'unit': 'kWh',
-            'tooltip': 'Total active energy exported in tariff T1 (in kWh).'
+            'tooltip': 'Total active energy exported in tariff T1 (in kWh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x1F] = {
             'len': 4,
             'description': 'Active Energy Export T2 kWh',
             'dataType': 'Uint32',
             'unit': 'kWh',
-            'tooltip': 'Total active energy exported in tariff T2 (in kWh).'
+            'tooltip': 'Total active energy exported in tariff T2 (in kWh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x20] = {
             'len': 4,
             'description': 'Reactive Energy Import T1 kvarh',
             'dataType': 'Uint32',
             'unit': 'kvarh',
-            'tooltip': 'Total reactive energy imported in tariff T1 (in kvarh).'
+            'tooltip': 'Total reactive energy imported in tariff T1 (in kvarh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x21] = {
             'len': 4,
             'description': 'Reactive Energy Import T2 kvarh',
             'dataType': 'Uint32',
             'unit': 'kvarh',
-            'tooltip': 'Total reactive energy imported in tariff T2 (in kvarh).'
+            'tooltip': 'Total reactive energy imported in tariff T2 (in kvarh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x22] = {
             'len': 4,
             'description': 'Reactive Energy Export T1 kvarh',
             'dataType': 'Uint32',
             'unit': 'kvarh',
-            'tooltip': 'Total reactive energy exported in tariff T1 (in kvarh).'
+            'tooltip': 'Total reactive energy exported in tariff T1 (in kvarh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x23] = {
             'len': 4,
             'description': 'Reactive Energy Export T2 kvarh',
             'dataType': 'Uint32',
             'unit': 'kvarh',
-            'tooltip': 'Total reactive energy exported in tariff T2 (in kvarh).'
+            'tooltip': 'Total reactive energy exported in tariff T2 (in kvarh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x24] = {
             'len': 8,
             'description': 'Active Energy Import T1 64bit',
             'dataType': 'Uint64',
             'unit': 'Wh',
-            'tooltip': 'Total active energy imported in tariff T1 (64-bit value in Wh).'
+            'tooltip': 'Total active energy imported in tariff T1 (64-bit value in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x25] = {
             'len': 8,
             'description': 'Active Energy Import T2 64bit',
             'dataType': 'Uint64',
             'unit': 'Wh',
-            'tooltip': 'Total active energy imported in tariff T2 (64-bit value in Wh).'
+            'tooltip': 'Total active energy imported in tariff T2 (64-bit value in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x26] = {
             'len': 8,
             'description': 'Active Energy Export T1 64bit',
             'dataType': 'Uint64',
             'unit': 'Wh',
-            'tooltip': 'Total active energy exported in tariff T1 (64-bit value in Wh).'
+            'tooltip': 'Total active energy exported in tariff T1 (64-bit value in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x27] = {
             'len': 8,
             'description': 'Active Energy Export T2 64bit',
             'dataType': 'Uint64',
             'unit': 'Wh',
-            'tooltip': 'Total active energy exported in tariff T2 (64-bit value in Wh).'
+            'tooltip': 'Total active energy exported in tariff T2 (64-bit value in Wh).',
+            'category': 'Active Energy Measurements'
         };
         dataTypes[0x28] = {
             'len': 8,
             'description': 'Reactive Energy Import T1 64bit',
             'dataType': 'Uint64',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy imported in tariff T1 (64-bit value in varh).'
+            'tooltip': 'Total reactive energy imported in tariff T1 (64-bit value in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x29] = {
             'len': 8,
             'description': 'Reactive Energy Import T2 64bit',
             'dataType': 'Uint64',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy imported in tariff T2 (64-bit value in varh).'
+            'tooltip': 'Total reactive energy imported in tariff T2 (64-bit value in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x2A] = {
             'len': 8,
             'description': 'Reactive Energy Export T1 64bit',
             'dataType': 'Uint64',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy exported in tariff T1 (64-bit value in varh).'
+            'tooltip': 'Total reactive energy exported in tariff T1 (64-bit value in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0x2B] = {
             'len': 8,
             'description': 'Reactive Energy Export T2 64bit',
             'dataType': 'Uint64',
             'unit': 'varh',
-            'tooltip': 'Total reactive energy exported in tariff T2 (64-bit value in varh).'
+            'tooltip': 'Total reactive energy exported in tariff T2 (64-bit value in varh).',
+            'category': 'Reactive Energy Measurements'
         };
         dataTypes[0xF0] = {
             'len': 1,
             'description': 'errorcode',
             'dataType': 'ErrorCode',
-            'tooltip': 'Error code indicating any issues or faults.'
+            'tooltip': 'Error code indicating any issues or faults.',
+            'category': 'Error Codes'
         };
         dataTypes[0xF1] = {
             'len': 4,
             'description': 'serial-number',
             'dataType': 'MeterSerial',
-            'tooltip': 'Serial number of the meter.'
+            'tooltip': 'Serial number of the meter.',
+            'category': 'Meter Information'
         };
         dataTypes[0xF2] = {
             'len': 4,
             'description': 'factor-number',
             'dataType': 'MeterSerial',
-            'tooltip': 'Factor number for calibration or identification.'
+            'tooltip': 'Factor number for calibration or identification.',
+            'category': 'Meter Information'
         };
         dataTypes[0xF3] = {
             'len': 2,
             'description': 'current-transformer primary',
             'dataType': 'Uint16',
-            'tooltip': 'Primary current rating of the current transformer (in A).'
+            'tooltip': 'Primary current rating of the current transformer (in A).',
+            'category': 'Meter Information'
         };
         dataTypes[0xF4] = {
             'len': 2,
             'description': 'current-transformer secondary',
             'dataType': 'Uint16',
-            'tooltip': 'Secondary current rating of the current transformer (in A).'
+            'tooltip': 'Secondary current rating of the current transformer (in A).',
+            'category': 'Meter Information'
         };
         dataTypes[0xF5] = {
             'len': 2,
             'description': 'voltage-transformer primary',
             'dataType': 'Uint16',
-            'tooltip': 'Primary voltage rating of the voltage transformer (in V).'
+            'tooltip': 'Primary voltage rating of the voltage transformer (in V).',
+            'category': 'Meter Information'
         };
         dataTypes[0xF6] = {
             'len': 2,
             'description': 'voltage-transformer secondary',
             'dataType': 'Uint16',
-            'tooltip': 'Secondary voltage rating of the voltage transformer (in V).'
+            'tooltip': 'Secondary voltage rating of the voltage transformer (in V).',
+            'category': 'Meter Information'
         };
         dataTypes[0xF7] = {
             'len': 1,
             'description': 'meter-type',
             'dataType': 'Uint8',
-            'tooltip': 'Type of the meter.'
+            'tooltip': 'Type of the meter.',
+            'category': 'Meter Information'
         };
         dataTypes[0xF8] = {
             'len': 4,
             'description': 'MID year',
             'dataType': 'BCD',
-            'tooltip': 'Year of the MID certification.'
+            'tooltip': 'Year of the MID certification.',
+            'category': 'Meter Information'
         };
         dataTypes[0xF9] = {
             'len': 4,
             'description': 'factory year',
             'dataType': 'BCD',
-            'tooltip': 'Year the meter was manufactured.'
+            'tooltip': 'Year the meter was manufactured.',
+            'category': 'Meter Information'
         };
         dataTypes[0xFA] = {
             'len': 4,
             'description': 'firmware version',
             'dataType': 'ASCII',
-            'tooltip': 'Firmware version of the meter.'
+            'tooltip': 'Firmware version of the meter.',
+            'category': 'Meter Information'
         };
         dataTypes[0xFB] = {
             'len': 4,
             'description': 'mid-Version',
             'dataType': 'ASCII',
-            'tooltip': 'Version of the MID certification.'
+            'tooltip': 'Version of the MID certification.',
+            'category': 'Meter Information'
         };
         dataTypes[0xFC] = {
             'len': 4,
             'description': 'manufacturer',
             'dataType': 'ASCII',
-            'tooltip': 'Manufacturer of the meter.'
+            'tooltip': 'Manufacturer of the meter.',
+            'category': 'Meter Information'
         };
         dataTypes[0xFD] = {
             'len': 4,
             'description': 'hw-index',
             'dataType': 'ASCII',
-            'tooltip': 'Hardware index or revision number.'
+            'tooltip': 'Hardware index or revision number.',
+            'category': 'Meter Information'
         };
         dataTypes[0xFE] = {
             'len': 4,
             'description': 'systemtime',
             'dataType': 'Uint32',
-            'tooltip': 'Current system time of the meter (in seconds since epoch).'
+            'tooltip': 'Current system time of the meter (in seconds since epoch).',
+            'category': 'Meter Information'
         };
 
-        // Generate checkboxes
+        // Generate checkboxes with groupings
         var checkboxContainer = document.getElementById('checkboxContainer');
-        for (var x in dataTypes) {
-            if (dataTypes.hasOwnProperty(x)) {
-                var dataType = dataTypes[x];
 
-                var checkboxDiv = document.createElement("div");
-                checkboxDiv.className = "checkbox-group";
-
-                var myInput = document.createElement("input");
-                myInput.setAttribute("type", "checkbox");
-                myInput.setAttribute("id", "f" + dataType['description']);
-                myInput.setAttribute("name", "f" + dataType['description']);
-                myInput.setAttribute("onclick", "doWork();");
-                myInput.value = x;
-
-                var myLabel = document.createElement("label");
-                myLabel.setAttribute("for", "f" + dataType['description']);
-                myLabel.innerHTML = dataType['description'];
-
-                // Tooltip icon
-                if (dataType['tooltip']) {
-                    var tooltipIcon = document.createElement("span");
-                    tooltipIcon.className = "tooltip-icon";
-                    tooltipIcon.innerHTML = "&#9432;"; // Information symbol
-
-                    var tooltipText = document.createElement("div");
-                    tooltipText.className = "tooltip-text";
-                    tooltipText.innerHTML = dataType['tooltip'];
-
-                    tooltipIcon.appendChild(tooltipText);
-                    checkboxDiv.appendChild(tooltipIcon);
+        // Get unique categories
+        var categories = {};
+        for (var key in dataTypes) {
+            if (dataTypes.hasOwnProperty(key)) {
+                var category = dataTypes[key].category || 'Other';
+                if (!categories[category]) {
+                    categories[category] = [];
                 }
-
-                checkboxDiv.appendChild(myInput);
-                checkboxDiv.appendChild(myLabel);
-
-                checkboxContainer.appendChild(checkboxDiv);
+                categories[category].push({ key: key, dataType: dataTypes[key] });
             }
         }
+
+        // Generate sections for each category
+        for (var categoryName in categories) {
+            if (categories.hasOwnProperty(categoryName)) {
+                var sectionDiv = document.createElement("div");
+                sectionDiv.className = "section";
+
+                var sectionHeader = document.createElement("h3");
+                sectionHeader.innerText = categoryName;
+                sectionDiv.appendChild(sectionHeader);
+
+                var items = categories[categoryName];
+                for (var i = 0; i < items.length; i++) {
+                    var x = items[i].key;
+                    var dataType = items[i].dataType;
+
+                    var checkboxDiv = document.createElement("div");
+                    checkboxDiv.className = "checkbox-group";
+
+                    var myInput = document.createElement("input");
+                    myInput.setAttribute("type", "checkbox");
+                    myInput.setAttribute("id", "f" + dataType['description']);
+                    myInput.setAttribute("name", "f" + dataType['description']);
+                    myInput.setAttribute("onclick", "doWork();");
+                    myInput.value = x;
+
+                    var myLabel = document.createElement("label");
+                    myLabel.setAttribute("for", "f" + dataType['description']);
+                    myLabel.innerHTML = dataType['description'];
+
+                    // Tooltip icon
+                    if (dataType['tooltip']) {
+                        var tooltipIcon = document.createElement("span");
+                        tooltipIcon.className = "tooltip-icon";
+                        tooltipIcon.innerHTML = "&#9432;"; // Information symbol
+                        var tooltipText = document.createElement("div");
+                        tooltipText.className = "tooltip-text";
+                        tooltipText.innerHTML = dataType['tooltip'];
+
+                        tooltipIcon.appendChild(tooltipText);
+                        checkboxDiv.appendChild(tooltipIcon);
+                    }
+
+                    checkboxDiv.appendChild(myInput);
+                    checkboxDiv.appendChild(myLabel);
+
+                    sectionDiv.appendChild(checkboxDiv);
+                }
+
+                checkboxContainer.appendChild(sectionDiv);
+            }
+        }
+
         function clearInput() {
             var form = document.getElementById('data');
             Array.from(form.elements).forEach(element => {
@@ -832,6 +898,7 @@
             document.getElementById('ergebnishex').innerHTML = toHexString(erg, false);
             document.getElementById('ergebnisbase64').innerHTML = base64EncArr(erg);
         }
+
         function toHexString(byteArray, withLeadingZero) {
             var filler = withLeadingZero ? '0x' : '';
             return filler + Array.from(byteArray, function (byte) {
